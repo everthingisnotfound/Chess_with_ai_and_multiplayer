@@ -1,3 +1,4 @@
+import "./pauseMenu.css";
 export default function PauseMenu({ onResume, onRestart, onExit }) {
   return (
     <div className="overlay">

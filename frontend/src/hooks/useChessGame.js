@@ -13,8 +13,8 @@ export default function useChessGame() {
   // ⏱ timer
   useEffect(() => {
     const interval = setInterval(() => {
-      if (game.turn() === "w") setWhiteTime(t => t + 1);
-      else setBlackTime(t => t + 1);
+      if (game.turn() === "w") setWhiteTime((t) => t + 1);
+      else setBlackTime((t) => t + 1);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -23,39 +23,55 @@ export default function useChessGame() {
   function handleSquareClick(square) {
     const piece = game.get(square);
 
-    // selecting a piece
-    if (!selectedSquare) {
-      if (piece && piece.color === game.turn()) {
-        setSelectedSquare(square);
-        const m = game.moves({ from: square, verbose: true });
-        setLegalMoves(m);
-      }
+    // ❌ No selection + empty square
+    if (!selectedSquare && !piece) {
+      setLegalMoves([]);
       return;
     }
 
-    // switching selection
-    if (piece && piece.color === game.turn()) {
+    // ✅ Selecting a piece
+    if (!selectedSquare && piece && piece.color === game.turn()) {
+      const moves = game.moves({
+        from: square, // 🔥 THIS IS THE KEY
+        verbose: true,
+      });
+
       setSelectedSquare(square);
-      const m = game.moves({ from: square, verbose: true });
-      setLegalMoves(m);
+      setLegalMoves(moves); // ONLY this piece's moves
       return;
     }
 
-    // attempt move
+    // 🔁 Switching to another own piece
+    if (piece && piece.color === game.turn()) {
+      const moves = game.moves({
+        from: square, // 🔥 AGAIN — FROM SELECTED PIECE ONLY
+        verbose: true,
+      });
+
+      setSelectedSquare(square);
+      setLegalMoves(moves);
+      return;
+    }
+
+    // 🎯 Attempt move
     const move = game.move({
       from: selectedSquare,
       to: square,
-      promotion: "q"
+      promotion: "q",
     });
 
     if (move) {
-      setFen(game.fen()); // 🔥 THIS IS CRITICAL
+      setFen(game.fen());
       setMoves(game.history({ verbose: true }));
     }
 
+    // 🧹 Always clear
     setSelectedSquare(null);
     setLegalMoves([]);
   }
+
+  const isCheck = game.isCheck();
+  const isCheckmate = game.isCheckmate();
 
   return {
     fen,
@@ -65,6 +81,8 @@ export default function useChessGame() {
     handleSquareClick,
     turn: fen.split(" ")[1],
     whiteTime,
-    blackTime
+    blackTime,
+    isCheck,
+    isCheckmate,
   };
 }
