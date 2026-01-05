@@ -5,7 +5,8 @@ export default function Board({
   fen,
   selectedSquare,
   legalMoves,
-  kingInCheckSquare, // ✅ NEW
+  kingInCheckSquare,
+  lastMoveTo,
   onSquareClick,
 }) {
   const boardFen = fen.split(" ")[0].split("/");
@@ -17,10 +18,12 @@ export default function Board({
           let colIndex = 0;
 
           return row.split("").map((char) => {
-            // piece square
+            // 🧩 PIECE SQUARE
             if (isNaN(char)) {
               const square =
                 String.fromCharCode(97 + colIndex) + (8 - rowIndex);
+
+              const isLight = (rowIndex + colIndex) % 2 === 0;
               colIndex++;
 
               return (
@@ -28,22 +31,26 @@ export default function Board({
                   key={square}
                   square={square}
                   fenChar={char}
-                  isLight={(rowIndex + colIndex) % 2 === 0}
+                  isLight={isLight}
                   isSelected={square === selectedSquare}
+                  isJustMoved={square === lastMoveTo}
                   legalMoves={legalMoves}
-                  isKingInCheck={square === kingInCheckSquare} // ✅ NEW
+                  selectedSquare={selectedSquare}
+                  isKingInCheck={square === kingInCheckSquare}
                   onClick={onSquareClick}
                 />
               );
             }
 
-            // empty squares
+            // 🧩 EMPTY SQUARES
             const emptyCount = Number(char);
             const empties = [];
 
             for (let j = 0; j < emptyCount; j++) {
               const square =
                 String.fromCharCode(97 + colIndex) + (8 - rowIndex);
+
+              const isLight = (rowIndex + colIndex) % 2 === 0;
               colIndex++;
 
               empties.push(
@@ -51,10 +58,12 @@ export default function Board({
                   key={square}
                   square={square}
                   fenChar={null}
-                  isLight={(rowIndex + colIndex) % 2 === 0}
+                  isLight={isLight}
                   isSelected={square === selectedSquare}
+                  isJustMoved={square === lastMoveTo}
                   legalMoves={legalMoves}
-                  isKingInCheck={square === kingInCheckSquare} // ✅ NEW
+                  selectedSquare={selectedSquare}
+                  isKingInCheck={square === kingInCheckSquare}
                   onClick={onSquareClick}
                 />
               );

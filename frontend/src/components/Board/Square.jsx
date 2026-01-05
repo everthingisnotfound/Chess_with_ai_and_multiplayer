@@ -5,7 +5,9 @@ export default function Square({
   fenChar,
   isLight,
   isSelected,
+  isJustMoved,
   legalMoves,
+  selectedSquare,
   isKingInCheck,
   onClick,
 }) {
@@ -16,16 +18,21 @@ export default function Square({
       }
     : null;
 
-  const isLegal = legalMoves.some((m) => m.to === square);
-  const isCapture = isLegal && piece;
+  // ✅ STRICT: show dots ONLY for selected piece
+  const moveFromSelected = legalMoves.find(
+    (m) => m.from === selectedSquare && m.to === square
+  );
 
+  const isLegal = Boolean(moveFromSelected);
+  const isCapture = isLegal && piece;
   const img = getPieceImage(piece);
 
   return (
     <div
-      className={`square ${isLight ? "light" : "dark"} ${
-        isSelected ? "selected" : ""
-      } ${isKingInCheck ? "king-check" : ""}`}
+      className={`square ${isLight ? "light" : "dark"} 
+        ${isSelected ? "selected" : ""} 
+        ${isJustMoved ? "moved" : ""} 
+        ${isKingInCheck ? "king-check" : ""}`}
       onClick={() => onClick(square)}
     >
       {img && <img src={img} alt="" draggable={false} />}

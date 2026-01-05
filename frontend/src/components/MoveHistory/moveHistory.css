@@ -1,7 +1,6 @@
 .move-history {
   width: 280px;
-  height: 360px;
-
+  height: 360px;                 /* 🔒 fixed container */
   padding: 14px;
   border-radius: 16px;
 
@@ -11,8 +10,13 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
 
-  overflow-y: auto;
   box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+
+  /* 🚫 IMPORTANT */
+  overflow: hidden;              /* NEVER scroll this */
 }
 
 .move-history h3 {
@@ -24,14 +28,21 @@
   color: #90caf9;
 }
 
-.move-history ol {
+/* ✅ ONLY THIS PART SCROLLS */
+.move-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.move-list ol {
   padding-left: 18px;
   margin: 0;
   font-size: 13px;
   line-height: 1.5;
 }
 
-.move-history li {
+.move-list li {
   margin-bottom: 8px;
   opacity: 0.9;
 }
