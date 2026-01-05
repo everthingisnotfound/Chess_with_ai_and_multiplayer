@@ -1,0 +1,35 @@
+:root {
+  /* 🌞 LIGHT – positivity, clarity */
+  --board-light: #f7f9fb;
+  --board-dark: #e1e7ef;
+  --board-border: #cfd8dc;
+  --dot-color: rgba(30, 136, 229, 0.85);
+  --capture-color: rgba(211, 47, 47, 0.9);
+}
+
+/* 🌑 DARK – tension, danger (NOT pitch black) */
+[data-theme="dark"] {
+  --board-light: #3a3f47;
+  --board-dark: #2b2f36;
+  --board-border: #ef5350;
+  --dot-color: rgba(255, 202, 40, 0.9);
+  --capture-color: rgba(239, 83, 80, 1);
+}
+
+/* ⚡ TECHIE – cyber / AI */
+[data-theme="tech"] {
+  --board-light: #0f172a;
+  --board-dark: #020617;
+  --board-border: #38bdf8;
+  --dot-color: #22d3ee;
+  --capture-color: #f43f5e;
+}
+
+/* ♟️ REAL-LIFE – wooden chessboard */
+[data-theme="wood"] {
+  --board-light: #f0d9b5;
+  --board-dark: #b58863;
+  --board-border: #5a3a1c;
+  --dot-color: rgba(255, 255, 255, 0.85);
+  --capture-color: rgba(183, 28, 28, 0.9);
+}

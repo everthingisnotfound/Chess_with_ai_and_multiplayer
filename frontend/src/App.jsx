@@ -1,11 +1,27 @@
+import { useEffect, useState } from "react";
 import Board from "./components/Board/Board";
 import PlayerInfo from "./components/PlayerInfo/PlayerInfo";
 import MoveHistory from "./components/MoveHistory/MoveHistory";
 import TurnIndicator from "./components/TurnIndicator/TurnIndicator";
-import useChessGame from "./hooks/useChessGame";
 import GameStateBanner from "./components/GameStateBanner/GameStateBanner";
+import ThemeSwitcher from "./components/ThemeSwitcher/ThemeSwitcher";
+import useChessGame from "./hooks/useChessGame";
+import { setSoundTheme } from "./utils/soundPlayer";
 
 export default function App() {
+  const [theme, setTheme] = useState("light");
+
+  // 🎨 Theme + Sound sync
+  function handleThemeChange(newTheme) {
+    setTheme(newTheme);
+    setSoundTheme(newTheme);
+  }
+
+  // 🌍 Apply theme globally
+  useEffect(() => {
+    document.body.setAttribute("data-theme", theme);
+  }, [theme]);
+
   const {
     fen,
     moves,
@@ -22,13 +38,14 @@ export default function App() {
 
   return (
     <>
-      {/* 🌍 Global layout fix */}
+      {/* Global styles */}
       <style>
         {`
           body {
             margin: 0;
             min-height: 100vh;
           }
+
           @keyframes fadeIn {
             from {
               opacity: 0;
@@ -39,7 +56,7 @@ export default function App() {
               transform: translateY(0);
             }
           }
-        }`}
+        `}
       </style>
 
       <div
@@ -52,7 +69,7 @@ export default function App() {
           fontFamily: "'Inter', system-ui, sans-serif",
         }}
       >
-        {/* Top info */}
+        {/* ⏱ Player info */}
         <div
           style={{
             display: "flex",
@@ -61,11 +78,17 @@ export default function App() {
             margin: "0 auto",
           }}
         >
-          <PlayerInfo name={`White (${whiteTime}s)`} />
-          <PlayerInfo name={`Black (${blackTime}s)`} />
+          <PlayerInfo name={`White (${whiteTime}s)`} isActive={turn === "w"} />
+          <PlayerInfo name={`Black (${blackTime}s)`} isActive={turn === "b"} />
         </div>
 
-        {/* Board + History */}
+        {/* 🎨 Theme Switcher */}
+        <ThemeSwitcher
+          theme={theme}
+          onThemeChange={handleThemeChange}
+        />
+
+        {/* ♟ Board + History */}
         <div
           style={{
             display: "flex",
@@ -80,17 +103,20 @@ export default function App() {
             selectedSquare={selectedSquare}
             legalMoves={legalMoves}
             onSquareClick={handleSquareClick}
-            kingInCheckSquare={kingInCheckSquare} 
+            kingInCheckSquare={kingInCheckSquare}
           />
-          <GameStateBanner
-            isCheck={isCheck}
-            isCheckmate={isCheckmate}
-            turn={turn}
-          />
-          <MoveHistory moves={moves} />
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <GameStateBanner
+              isCheck={isCheck}
+              isCheckmate={isCheckmate}
+              turn={turn}
+            />
+            <MoveHistory moves={moves} />
+          </div>
         </div>
 
-        {/* Turn indicator */}
+        {/* 🔁 Turn Indicator (optional now, since player box lights up) */}
         <TurnIndicator turn={turn} />
       </div>
     </>

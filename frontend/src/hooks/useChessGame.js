@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Chess } from "chess.js";
+import { playSound } from "../utils/soundPlayer";
 
 export default function useChessGame() {
   const [game] = useState(() => new Chess());
@@ -70,7 +71,6 @@ export default function useChessGame() {
       return;
     }
 
-    // 🎯 MOVE ATTEMPT
     const move = game.move({
       from: selectedSquare,
       to: square,
@@ -81,11 +81,21 @@ export default function useChessGame() {
       setFen(game.fen());
       setMoves(game.history({ verbose: true }));
       setLastMoveTo(move.to);
-    }
 
-    // 🧹 ALWAYS CLEAR
-    setSelectedSquare(null);
-    setLegalMoves([]);
+      // 🔊 SOUND LOGIC
+      if (move.captured) {
+        playSound("capture");
+      } else {
+        playSound("move");
+      }
+
+      // 🔔 CHECK / CHECKMATE
+      if (game.isCheckmate()) {
+        playSound("checkmate");
+      } else if (game.isCheck()) {
+        playSound("check");
+      }
+    }
   }
 
   // 🔥 KING-IN-CHECK

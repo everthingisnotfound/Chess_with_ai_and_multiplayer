@@ -1,23 +1,46 @@
+import { useEffect, useState } from "react";
+import "./gameStateBanner.css";
+
 export default function GameStateBanner({ isCheck, isCheckmate, turn }) {
-  if (!isCheck && !isCheckmate) return null;
+  const [showCheck, setShowCheck] = useState(false);
+
+  // Auto-hide CHECK only
+  useEffect(() => {
+    if (isCheck && !isCheckmate) {
+      setShowCheck(true);
+      const t = setTimeout(() => setShowCheck(false), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [isCheck, isCheckmate]);
+
+  // CHECKMATE is derived — no state needed
+  if (!isCheckmate && !showCheck) return null;
+
+  const winner =
+    isCheckmate && (turn === "w" ? "Black" : "White");
 
   return (
     <div
-      style={{
-        marginTop: "12px",
-        padding: "10px",
-        textAlign: "center",
-        fontWeight: "bold",
-        fontSize: "18px",
-        color: "#fff",
-        backgroundColor: isCheckmate ? "#c62828" : "#f57c00",
-        borderRadius: "6px",
-        animation: "fadeIn 0.4s ease"
-      }}
+      className={`game-banner ${
+        isCheckmate ? "checkmate" : "check"
+      }`}
     >
-      {isCheckmate
-        ? `♚ CHECKMATE — ${turn === "w" ? "Black" : "White"} wins`
-        : "⚠️ CHECK"}
+      {isCheckmate ? (
+        <>
+          <span className="icon">♚</span>
+          <div className="text">
+            <strong>CHECKMATE</strong>
+            <div className="sub">{winner} wins</div>
+          </div>
+        </>
+      ) : (
+        <>
+          <span className="icon">⚠</span>
+          <div className="text">
+            <strong>CHECK</strong>
+          </div>
+        </>
+      )}
     </div>
   );
 }
