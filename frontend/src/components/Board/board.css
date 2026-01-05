@@ -65,8 +65,14 @@
   z-index: 1;
 }
 
-.light { background-color: var(--board-light); }
-.dark  { background-color: var(--board-dark); }
+.light {
+  background-color: var(--light-square);
+}
+
+.dark {
+  background-color: var(--dark-square);
+}
+
 
 .selected {
   outline: 3px solid #2e7d32;

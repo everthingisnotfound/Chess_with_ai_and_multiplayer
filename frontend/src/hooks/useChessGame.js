@@ -13,6 +13,12 @@ export default function useChessGame() {
   const [lastMoveTo, setLastMoveTo] = useState(null);
 
   useEffect(() => {
+    // 🔒 When turn changes, clear any leftover selection
+    setSelectedSquare(null);
+    setLegalMoves([]);
+  }, [fen]); // fen changes AFTER every valid move
+
+  useEffect(() => {
     if (lastMoveTo) {
       const t = setTimeout(() => setLastMoveTo(null), 200);
       return () => clearTimeout(t);
