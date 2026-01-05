@@ -10,6 +10,8 @@ import { setSoundTheme } from "./utils/soundPlayer";
 
 export default function App() {
   const [theme, setTheme] = useState("light");
+  const [playerColor, setPlayerColor] = useState(null);
+  {!playerColor && <TossModal onResult={setPlayerColor} />}
 
   // 🎨 Theme + Sound sync
   function handleThemeChange(newTheme) {

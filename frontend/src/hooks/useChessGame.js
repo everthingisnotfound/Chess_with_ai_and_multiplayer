@@ -2,78 +2,61 @@ import { useState, useEffect } from "react";
 import { Chess } from "chess.js";
 import { playSound } from "../utils/soundPlayer";
 
-export default function useChessGame() {
+export default function useChessGame(playerColor) {
   const [game] = useState(() => new Chess());
+
   const [fen, setFen] = useState(game.fen());
   const [moves, setMoves] = useState([]);
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [legalMoves, setLegalMoves] = useState([]);
+
   const [whiteTime, setWhiteTime] = useState(0);
   const [blackTime, setBlackTime] = useState(0);
+
   const [lastMoveTo, setLastMoveTo] = useState(null);
 
+  const [isCheck, setIsCheck] = useState(false);
+  const [isCheckmate, setIsCheckmate] = useState(false);
+
+  /* ⏱ TIMER (paused until toss) */
   useEffect(() => {
-    // 🔒 When turn changes, clear any leftover selection
-    setSelectedSquare(null);
-    setLegalMoves([]);
-  }, [fen]); // fen changes AFTER every valid move
+    if (!playerColor || game.isGameOver()) return;
+
+    const id = setInterval(() => {
+      if (game.turn() === "w") setWhiteTime(t => t + 1);
+      else setBlackTime(t => t + 1);
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, [game, fen, playerColor]);
 
   useEffect(() => {
-    if (lastMoveTo) {
-      const t = setTimeout(() => setLastMoveTo(null), 200);
-      return () => clearTimeout(t);
-    }
+    if (!lastMoveTo) return;
+    const t = setTimeout(() => setLastMoveTo(null), 200);
+    return () => clearTimeout(t);
   }, [lastMoveTo]);
 
-  // ⏱ Timer
-  useEffect(() => {
-    const id = setInterval(() => {
-      if (game.turn() === "w") setWhiteTime((t) => t + 1);
-      else setBlackTime((t) => t + 1);
-    }, 1000);
-    return () => clearInterval(id);
-  }, [game]);
-
   function handleSquareClick(square) {
-    // 🛑 HARD STOP IF GAME OVER
+    if (!playerColor) return;
     if (game.isGameOver()) return;
 
     const piece = game.get(square);
 
-    // 🔄 DESELECT if same square
     if (square === selectedSquare) {
       setSelectedSquare(null);
       setLegalMoves([]);
       return;
     }
 
-    // ❌ Empty click with nothing selected
-    if (!selectedSquare && !piece) {
-      setLegalMoves([]);
-      return;
-    }
-
-    // ✅ SELECT PIECE (STRICT)
     if (!selectedSquare && piece && piece.color === game.turn()) {
-      const scopedMoves = game.moves({
-        from: square,
-        verbose: true,
-      });
-
       setSelectedSquare(square);
-      setLegalMoves(scopedMoves); // 🔒 ONLY THIS PIECE
+      setLegalMoves(game.moves({ from: square, verbose: true }));
       return;
     }
 
-    // 🔁 SWITCH SELECTION
     if (piece && piece.color === game.turn()) {
-      const scopedMoves = game.moves({
-        from: square,
-        verbose: true,
-      });
-
       setSelectedSquare(square);
-      setLegalMoves(scopedMoves); // 🔒 ONLY THIS PIECE
+      setLegalMoves(game.moves({ from: square, verbose: true }));
       return;
     }
 
@@ -83,44 +66,42 @@ export default function useChessGame() {
       promotion: "q",
     });
 
-    if (move) {
-      setFen(game.fen());
-      setMoves(game.history({ verbose: true }));
-      setLastMoveTo(move.to);
+    if (!move) return;
 
-      // 🔊 SOUND LOGIC
-      if (move.captured) {
-        playSound("capture");
-      } else {
-        playSound("move");
-      }
+    setFen(game.fen());
+    setMoves(game.history({ verbose: true }));
+    setLastMoveTo(move.to);
 
-      // 🔔 CHECK / CHECKMATE
-      if (game.isCheckmate()) {
-        playSound("checkmate");
-      } else if (game.isCheck()) {
-        playSound("check");
-      }
-    }
+    setSelectedSquare(null);
+    setLegalMoves([]);
+
+    const check = game.isCheck();
+    const mate = game.isCheckmate();
+
+    setIsCheck(check);
+    setIsCheckmate(mate);
+
+    if (mate) playSound("Checkmate");
+    else if (check) playSound("Check");
+    else if (move.captured) playSound("Capture");
+    else playSound("Move");
   }
 
-  // 🔥 KING-IN-CHECK
+  /* 🔥 KING IN CHECK */
   let kingInCheckSquare = null;
-  if (game.isCheck()) {
+  if (isCheck) {
     const board = game.board();
     const colorInCheck = game.turn() === "w" ? "b" : "w";
 
     board.forEach((row, r) => {
       row.forEach((p, c) => {
         if (p && p.type === "k" && p.color === colorInCheck) {
-          kingInCheckSquare = String.fromCharCode(97 + c) + (8 - r);
+          kingInCheckSquare =
+            String.fromCharCode(97 + c) + (8 - r);
         }
       });
     });
   }
-
-  const isCheck = game.isCheck();
-  const isCheckmate = game.isCheckmate();
 
   return {
     fen,

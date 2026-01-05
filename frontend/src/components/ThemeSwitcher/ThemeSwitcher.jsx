@@ -8,7 +8,7 @@ export default function ThemeSwitcher({ theme, onThemeChange }) {
 
   return (
     <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-      {themes.map((t) => (
+      {themes.map(t => (
         <button
           key={t.key}
           onClick={() => onThemeChange(t.key)}

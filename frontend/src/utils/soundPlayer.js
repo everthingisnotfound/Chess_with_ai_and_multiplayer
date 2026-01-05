@@ -1,14 +1,20 @@
 let currentTheme = "light";
 
+const audioCache = {};
+
 export function setSoundTheme(theme) {
   currentTheme = theme;
 }
 
 export function playSound(type) {
-  const audio = new Audio(
-    `/sounds/${currentTheme}/${type}.mp3`
-  );
+  const key = `${currentTheme}-${type}`;
 
-  audio.volume = 0.8;
+  if (!audioCache[key]) {
+    audioCache[key] = new Audio(`/sounds/${currentTheme}/${type}.mp3`);
+    audioCache[key].volume = 0.8;
+  }
+
+  const audio = audioCache[key];
+  audio.currentTime = 0;
   audio.play().catch(() => {});
 }
