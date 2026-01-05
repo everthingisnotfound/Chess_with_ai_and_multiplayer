@@ -5,7 +5,8 @@ export default function Board({
   fen,
   selectedSquare,
   legalMoves,
-  onSquareClick
+  kingInCheckSquare, // ✅ NEW
+  onSquareClick,
 }) {
   const boardFen = fen.split(" ")[0].split("/");
 
@@ -15,7 +16,7 @@ export default function Board({
         {boardFen.map((row, rowIndex) => {
           let colIndex = 0;
 
-          return row.split("").map(char => {
+          return row.split("").map((char) => {
             // piece square
             if (isNaN(char)) {
               const square =
@@ -30,6 +31,7 @@ export default function Board({
                   isLight={(rowIndex + colIndex) % 2 === 0}
                   isSelected={square === selectedSquare}
                   legalMoves={legalMoves}
+                  isKingInCheck={square === kingInCheckSquare} // ✅ NEW
                   onClick={onSquareClick}
                 />
               );
@@ -52,6 +54,7 @@ export default function Board({
                   isLight={(rowIndex + colIndex) % 2 === 0}
                   isSelected={square === selectedSquare}
                   legalMoves={legalMoves}
+                  isKingInCheck={square === kingInCheckSquare} // ✅ NEW
                   onClick={onSquareClick}
                 />
               );

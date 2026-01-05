@@ -17,6 +17,7 @@ export default function App() {
     blackTime,
     isCheck,
     isCheckmate,
+    kingInCheckSquare,
   } = useChessGame();
 
   return (
@@ -79,6 +80,7 @@ export default function App() {
             selectedSquare={selectedSquare}
             legalMoves={legalMoves}
             onSquareClick={handleSquareClick}
+            kingInCheckSquare={kingInCheckSquare} 
           />
           <GameStateBanner
             isCheck={isCheck}

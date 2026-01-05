@@ -6,16 +6,17 @@ export default function Square({
   isLight,
   isSelected,
   legalMoves,
-  onClick
+  isKingInCheck,
+  onClick,
 }) {
   const piece = fenChar
     ? {
         type: fenChar.toLowerCase(),
-        color: fenChar === fenChar.toLowerCase() ? "b" : "w"
+        color: fenChar === fenChar.toLowerCase() ? "b" : "w",
       }
     : null;
 
-  const isLegal = legalMoves.some(m => m.to === square);
+  const isLegal = legalMoves.some((m) => m.to === square);
   const isCapture = isLegal && piece;
 
   const img = getPieceImage(piece);
@@ -24,7 +25,7 @@ export default function Square({
     <div
       className={`square ${isLight ? "light" : "dark"} ${
         isSelected ? "selected" : ""
-      }`}
+      } ${isKingInCheck ? "king-check" : ""}`}
       onClick={() => onClick(square)}
     >
       {img && <img src={img} alt="" draggable={false} />}

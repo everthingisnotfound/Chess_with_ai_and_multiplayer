@@ -10,7 +10,7 @@ export default function useChessGame() {
   const [whiteTime, setWhiteTime] = useState(0);
   const [blackTime, setBlackTime] = useState(0);
 
-  // ⏱ timer
+  // ⏱ Timer logic (UNCHANGED)
   useEffect(() => {
     const interval = setInterval(() => {
       if (game.turn() === "w") setWhiteTime((t) => t + 1);
@@ -21,39 +21,33 @@ export default function useChessGame() {
   }, [game]);
 
   function handleSquareClick(square) {
+    if (game.isGameOver()) return;
+
     const piece = game.get(square);
 
-    // ❌ No selection + empty square
+    // No selection + empty square
     if (!selectedSquare && !piece) {
       setLegalMoves([]);
       return;
     }
 
-    // ✅ Selecting a piece
+    // Selecting a piece
     if (!selectedSquare && piece && piece.color === game.turn()) {
-      const moves = game.moves({
-        from: square, // 🔥 THIS IS THE KEY
-        verbose: true,
-      });
-
+      const lm = game.moves({ from: square, verbose: true });
       setSelectedSquare(square);
-      setLegalMoves(moves); // ONLY this piece's moves
+      setLegalMoves(lm);
       return;
     }
 
-    // 🔁 Switching to another own piece
+    // Switching selection
     if (piece && piece.color === game.turn()) {
-      const moves = game.moves({
-        from: square, // 🔥 AGAIN — FROM SELECTED PIECE ONLY
-        verbose: true,
-      });
-
+      const lm = game.moves({ from: square, verbose: true });
       setSelectedSquare(square);
-      setLegalMoves(moves);
+      setLegalMoves(lm);
       return;
     }
 
-    // 🎯 Attempt move
+    // Attempt move
     const move = game.move({
       from: selectedSquare,
       to: square,
@@ -65,13 +59,26 @@ export default function useChessGame() {
       setMoves(game.history({ verbose: true }));
     }
 
-    // 🧹 Always clear
     setSelectedSquare(null);
     setLegalMoves([]);
   }
 
-  const isCheck = game.isCheck();
-  const isCheckmate = game.isCheckmate();
+  // 🔥 KING-IN-CHECK LOGIC (NEW, SAFE ADDITION)
+  let kingInCheckSquare = null;
+
+  if (game.isCheck()) {
+    const board = game.board();
+    const colorInCheck = game.turn() === "w" ? "b" : "w";
+
+    board.forEach((row, rowIndex) => {
+      row.forEach((piece, colIndex) => {
+        if (piece && piece.type === "k" && piece.color === colorInCheck) {
+          kingInCheckSquare =
+            String.fromCharCode(97 + colIndex) + (8 - rowIndex);
+        }
+      });
+    });
+  }
 
   return {
     fen,
@@ -82,7 +89,8 @@ export default function useChessGame() {
     turn: fen.split(" ")[1],
     whiteTime,
     blackTime,
-    isCheck,
-    isCheckmate,
+    isCheck: game.isCheck(),
+    isCheckmate: game.isCheckmate(),
+    kingInCheckSquare, // ✅ NEW
   };
 }
